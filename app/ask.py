@@ -31,13 +31,28 @@ def ask(question: str) -> str:
 
     return response.text
 
+def chat():
+    client = genai.Client(api_key=get_api_key())
+    session = client.chats.create(model=MODEL)
+    while True:
+        question = input("あなた>")
+        if question == "":
+            break
+        response = session.send_message(question)
+        print(response.text)
+        print(f"入力{response.usage_metadata.prompt_token_count} / 出力{response.usage_metadata.candidates_token_count}")
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="素のLLMに質問する")
     parser.add_argument("question", nargs="?", default=DEFAULT_QUESTION)
+    parser.add_argument("--chat", action="store_true", help="会話を続けて質問する")
     args = parser.parse_args()
 
     print(f"[model] {MODEL}")
+    if args.chat:
+        chat()
+        return
     print(f"[質問] {args.question}\n")
     try:
         print(ask(args.question))
